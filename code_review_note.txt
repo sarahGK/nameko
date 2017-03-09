@@ -1,0 +1,22 @@
+I think the program wants to check each integer greater than or equal to 1 and less than the input number and return 4 different values based on following situations:
+  (1) return 'FizzBuzz' if it is the mutiple of both 3 and 5;
+  (2) return 'Fuzz' if it is mutiple of 3 not 5;
+  (3) return 'Buzz' if it is the mutiple of 5 not 3;
+  (4) otherwise,return the integer itself.
+
+Also, the program considers the situation when the input is not a number and then raise an error.
+
+The result of running this program will always print failed. So I made following changes:
+(1) Check if the input is a positive integer(line 19-20) before the for loop,while inside the function check(a), line 2 if statement is always false;
+(2) In the for loop(line 23), xrange() only takes integers as parameters and sys.argv[0] is the name of the source code file, e.g. command line python code_review.py 15, sys.argv[0] returns "code_review.py" and sys.argv[1] returns "15". So it should be xrange(1,int(sys.argv[1])) returning a sequence of numbers between 1 and input number(exlusive).
+(3) Change to u'FizzBuzz' in line 4 for consistence with line 6 and 8, which use unicode characters.
+
+Test cases are:
+python code_review_revised.py 3
+python code_review_revised.py 5
+python code_review_revised.py 15
+python code_review_revised.py 15.6
+python code_review_revised.py helloworld
+python code_review_revised.py -1
+
+

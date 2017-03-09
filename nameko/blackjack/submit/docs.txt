@@ -1,0 +1,25 @@
+As described in Task#2, I made some design decisions for the basic function the Blackjack application should have:
+
+1. This will be a card game with only one player at a time. As for the dealer, since it's behavior is totally determined by the rules, so I treated it like an agent on the server playing with the player who actually would interact with the application. I implemented two classes.
+
+One class is PlayingDeck, which has a deck of cards, a drawCard method which returns a random card from the deck, a getTotalPoints method calculates the values of a list of cards (if there is an Ace, assuming its best value for wining the game), and a getPoints method returns the value of a card. The instance of this class is the current game, so the deck of @the cards from which player and dealer draw from would change@. So PlayingDeck class has a method called setDeck and a @stack list called Deck consisting of 52 characters representing 52 different cards @is defined.
+
+The other class is User for player and dealer.@User has an initializer taking name for distinguishing player and dealer and @set the hand which means the cards in hand to be empty. It also has a method called drawCard, which draws one card from the deck and @add it to the its hand. @Method "start" to start a game, @would set hand to be empty and draw two cards(assume the dealer is given two cards instead of one in the beginning as well. To improve it, add an if-statement or define dealer as a subclass of User.). Method "setHand" setting the hand to the given cards list, mainly to resume an unfinished game which means getting the hand from the database instead to draw cards directly. Methods getPoints calculate the value of the hand and getResult would return a message when anyone wins or loses.
+
+This part of implementation is in file api.py.
+
+2.The player use the service to play the game. This part are using Nameko and Nameko-sqlalchemy and SQLite to keep the persistent state of the game. 
+
+According to Nameko framework, A service class BlackJack is defined in service.py. It has dependencies on the PlayingDeck and User as mentioned above and one database created by sqlalchemy called blackjack.sqlite. 
+
+The player facing APIs are three Nameko RPC calls, start(),hit() and stick(), which are defined with entrypoint @rpc. start() would start a game, hit() would draw a game to player's hand and stick() would let dealer draw cards until the game is over(either player or dealer wins means game over.) These three entrypoints do similiar routines. They all starting with checking the latest record of the database first. If the record shows the game hasn't finished yet, then load the record to player, dealer and deck accordingly. And then create one new record for current game and update the record whenever player's hand, dealer's hand or the game status(finished or not) changes.
+
+For the database part, class Games is defined in db.py and Sqlalchemy is used to generate the table "games" and database "blackjack.sqlite". Table "games" has an auto increment integer game_id as the primary key, string player_hander, dealer_hander, deck and SmallInteger result to save the status of the game. 
+
+3. There are some methods like checkDeck and start in api.py and update and add in db.py. These are defined mainly for "reusiablity"???because these codes are used repeatedly 
+
+4.When I use Session from nameko-sqlalchemy to declare the dependency on the database, there are always a compiler error:Keyerror:[DB_URIS]. I found it came from the database_session.py in the package and figured out the program uses key DB_URIS to get the value from the dictionary something like"container.config" to create an engine and then the database. In order to make the Session work, I just hard-coded the setup function (line27-29)in database_session.py. Haven't got enough time to solve the problem with Keyerror thoroughly.
+
+I made some assumptions to get the service work and there are still improvement I can make, such as timer to show dealer's drawing card one by one and considering concurrency. Also, I still need to make the code more concise and clean.
+
+
